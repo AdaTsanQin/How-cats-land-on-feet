@@ -136,7 +136,7 @@ The project evolved through five distinct stages:
 ### 3D Visualization
 The animation shows the cat falling from height. It bends, twists its body segments symmetrically, and the entire body magically flips $180^\circ$ to face the ground just before impact.
 
-![Cat Reflex Simulation Result](cat_reflex1.gif)
+![Cat Reflex Simulation Result](cat_reflex_final.gif)
 
 ### Data Analysis (Angular Momentum)
 The generated plots validate the physics engine:
