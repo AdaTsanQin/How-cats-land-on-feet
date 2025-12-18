@@ -87,35 +87,82 @@ To enhance realism and perception:
 
 ---
 
-## 5. Algorithmic Logic (Solver Pseudo-code)
+## 5. Algorithmic Logic (Prompt to AI)
 
-The core logic has shifted from linear interpolation to a differential equation solver:
+The core logic was prompted to Gemini3 pro:
 
 ```text
-FUNCTION Update(frame):
-    // 1. Kinematics (Shape Change)
-    current_bend  = Interpolate(Bend_Sequence)
-    current_twist = Interpolate(Spin_Sequence)
-    current_width = Calculate_Virtual_Inertia_Width()
+<prompt>
+    <role>
+        You are an expert in Computational Physics and Python Programming. You possess deep knowledge of Rigid Body Dynamics, Quaternion mathematics, and scientific visualization.
+    </role>
 
-    // 2. Construct Local Frames (Quaternions)
-    Q_front_local = Bend_F * Twist_F
-    Q_back_local  = Bend_B * Twist_B
+    <context>
+        <problem_definition>
+            We need to simulate the "Cat Righting Reflex" (Falling Cat Problem) to demonstrate how a falling body can change its orientation by 180 degrees without any external torque.
+        </problem_definition>
+        <model_specs>
+            <geometry>Two rectangular prisms representing the cat: the "Upper Body" and the "Lower Body".</geometry>
+            <coordinates>
+                X-axis: Horizontal (Left-Right)
+                Y-axis: Vertical (Upward)
+                Z-axis: Horizontal (Front-Back)
+            </coordinates>
+            <initial_state>
+                Alignment: Along X-axis
+                Posture: Body flat
+                Orientation: Belly facing UP (+Y)
+            </initial_state>
+            <properties>Base Moment of Inertia (I) = 1.0 for both body segments.</properties>
+        </model_specs>
+    </context>
 
-    // 3. Compute Physics Properties
-    Inertia_Tensor = Transform_Inertia_To_Global(current_width)
-    L_internal     = I_front * w_front_rel + I_back * w_back_rel
+    <task>
+        Write a complete, executable Python script to simulate and animate this process. The simulation must strictly follow this kinematic sequence:
+        <steps>
+            <step index="1" name="Bend">
+                The cat curls its spine upward to form a V-shape.
+            </step>
+            <step index="2" name="Upper Twist">
+                Simulate "front legs tuck / hind legs extend" by decreasing Upper Body Inertia and increasing Lower Body Inertia. 
+                Result: Upper body rotates significantly; lower body counter-rotates slightly.
+            </step>
+            <step index="3" name="Lower Twist">
+                Simulate "hind legs tuck / front legs extend" by decreasing Lower Body Inertia and increasing Upper Body Inertia. 
+                Result: Lower body rotates significantly; upper body stabilizes.
+            </step>
+            <step index="4" name="Plane Rotation">
+                The plane containing the folded body rotates in the YZ plane to cancel out residual angular momentum.
+            </step>
+            <step index="5" name="Final State">
+                The cat ends with belly facing DOWN (-Y), body arched downwards, ready for landing.
+            </step>
+        </steps>
+    </task>
 
-    // 4. Solve for Base Reaction (The "Flip")
-    w_base = - Inverse(Inertia_Tensor) * L_internal
+    <constraints>
+        <rule>
+            <strong>Zero External Torque:</strong> The Total Angular Momentum must remain effectively zero throughout the entire process. Use the conservation law ($L_{total} = I_{upper}\omega_{upper} + I_{lower}\omega_{lower} = 0$) to calculate rotation speeds.
+        </rule>
+        <rule>
+            <strong>Math Implementation:</strong> You MUST use Quaternions (via `scipy.spatial.transform.Rotation`) for all rotations to prevent gimbal lock and ensure numerical stability. Do not use Euler angles for calculation.
+        </rule>
+        <rule>
+            <strong>Dynamics:</strong> Control the rotation by dynamically varying the Moment of Inertia ($I$) values over time steps to simulate the leg movements.
+        </rule>
+        <rule>
+            <strong>Libraries:</strong> Use `numpy` for calculations, `scipy` for rotations, and `matplotlib` for 3D animation.
+        </rule>
+    </constraints>
 
-    // 5. Integrate Global Pose (Quaternion Integration)
-    Global_Orientation += w_base * dt
-    Altitude = Initial_Height - 0.5 * g * time^2
-
-    RENDER(Scene)
+    <output_format>
+        Provide a single Python script that generates:
+        1. A 3D Animation (Subplot 1) showing the two prisms tumbling and reorienting from "belly up" to "belly down".
+        2. Real-time line plots (Subplot 2) showing the Angular Momentum ($L_x, L_y, L_z$) for the Upper Body, Lower Body, and the Total System. (Total System line must stay near 0).
+    </output_format>
+</prompt>
 ```
-The basic model framework, code structure, and graphic rendering are completed by Gemini3 pro, while the detailed physics, mathematics, parameter fine tuning are manually implemented.
+The basic model framework, code structure, and graphic rendering are completed by Gemini3 pro, while the detailed physics, mathematics, parameter are manually fine-tuned.
 
 ---
 
@@ -136,7 +183,7 @@ The project evolved through five distinct stages:
 ### 3D Visualization
 The animation shows the cat falling from height. It bends, twists its body segments symmetrically, and the entire body magically flips $180^\circ$ to face the ground just before impact.
 
-![Cat Reflex Simulation Result](cat_reflex1.gif)
+![Cat Reflex Simulation Result](cat_reflex_final.gif)
 
 ### Data Analysis (Angular Momentum)
 The generated plots validate the physics engine:
